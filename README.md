@@ -26,10 +26,16 @@ docker compose up -d
 
 Note: If multiple Python versions are installed, use `py -3.10 -m venv venv` to create the virtual environment
 ```
-
+  
 This starts:
 - a single-node Kafka broker (KRaft mode, no Zookeeper) on `localhost:9092`
 - Kafka UI at `http://localhost:8080` to browse topics/messages/offsets
+- `replication-factor: 1` and single controller voter are fine for local
+  dev only — a production cluster would use 3+ brokers/voters for fault tolerance.
 
 Each numbered folder is self-contained — see its own README for what the
 pattern demonstrates and how to run it.
+
+
+
+
