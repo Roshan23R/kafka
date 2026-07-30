@@ -15,7 +15,7 @@ import time
 import json
 from confluent_kafka import Producer
 
-TOPIC = "orders"
+TOPIC = "order-placed"
 
 def delivery_report(err, msg):
     if err is not None:
