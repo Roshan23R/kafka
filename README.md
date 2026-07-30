@@ -16,6 +16,8 @@ Python (`confluent-kafka`) against a single local broker.
 | 9 | Data Pipelines | `09-data-pipelines` |
 | 10 | Replay & Recovery | `10-replay-recovery` |
 
+These use cases are shown in gif [`kafka-use-cases.gif`](kafka-use-cases.gif)
+
 ## Setup
 
 ```bash
@@ -34,7 +36,7 @@ This starts:
   dev only — a production cluster would use 3+ brokers/voters for fault tolerance.
 
 Each numbered folder is self-contained — see its own README for what the
-pattern demonstrates and how to run it.
+pattern demonstrates and how to run it. 
 
 
 
