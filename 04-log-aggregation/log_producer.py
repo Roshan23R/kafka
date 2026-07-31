@@ -29,6 +29,8 @@ METHODS = ["GET", "POST"]
 def delivery_report(err, msg):
     if err is not None:
         print(f"Delivery failed: {err}")
+    else:
+        print(f"  -> [{msg.key().decode()}] delivered to partition {msg.partition()}")
 
 
 def random_log_line(service):

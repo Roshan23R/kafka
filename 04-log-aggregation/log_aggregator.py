@@ -64,7 +64,7 @@ def main():
                 continue
 
             color = COLORS.get(log["level"], "")
-            print(f"{color}[{log['service']}] {log['level']:<5} {log['message']}{RESET}")
+            print(f"{color}[p{msg.partition()}] [{log['service']}] {log['level']:<5} {log['message']}{RESET}")
     except KeyboardInterrupt:
         pass
     finally:
