@@ -46,12 +46,12 @@ def emit_window(producer, window_start, window_end, counts):
     producer.poll(0)
 
     # just display the window summary in the console for this demo;
-    print(f"\n── Window {time.strftime('%H:%M:%S', time.localtime(window_start))} "
-          f"→ {time.strftime('%H:%M:%S', time.localtime(window_end))} ──")
-    for cat, count in sorted(counts.items(), key=lambda x: -x[1]):
-        bar = "█" * count
-        print(f"  {cat:<15} {bar} ({count})")
-    print(f"  {'TOTAL':<15} {summary['total']}")
+    # print(f"\n── Window {time.strftime('%H:%M:%S', time.localtime(window_start))} "
+    #       f"→ {time.strftime('%H:%M:%S', time.localtime(window_end))} ──")
+    # for cat, count in sorted(counts.items(), key=lambda x: -x[1]):
+    #     bar = "█" * count
+    #     print(f"  {cat:<15} {bar} ({count})")
+    # print(f"  {'TOTAL':<15} {summary['total']}")
 
 
 def main():
@@ -82,6 +82,9 @@ def main():
             # close the window when its duration has elapsed
             if now - window_start >= args.window:
                 emit_window(producer, window_start, now, window_counts)
+                print(f"\n── Window {time.strftime('%H:%M:%S', time.localtime(window_start))} "
+                        f"→ {time.strftime('%H:%M:%S', time.localtime(now))} ──")
+                print(f"  {'TOTAL':<15} {sum(window_counts.values())}")
                 window_start  = now
                 window_counts = defaultdict(int)
 
@@ -94,6 +97,7 @@ def main():
 
             event = json.loads(msg.value())
             window_counts[event["category"]] += 1
+
 
     except KeyboardInterrupt:
         # emit the partial window on shutdown
