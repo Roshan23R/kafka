@@ -6,15 +6,15 @@ Python (`confluent-kafka`) against a single local broker.
 | # | Pattern | Folder |
 |---|---------|--------|
 | 1 | Async Messaging | [`01-async-messaging`](01-async-messaging) |
-| 2 | Pub-Sub Fan-Out | `02-pubsub-fanout` |
-| 3 | Activity Tracking | `03-activity-tracking` |
+| 2 | Pub-Sub Fan-Out | [`02-pubsub-fanout`](02-pubsub-fanout) |
+| 3 | Activity Tracking | [`03-activity-tracking`](03-activity-tracking) |
 | 4 | Log Aggregation | [`04-log-aggregation`](04-log-aggregation) |
-| 5 | Stream Processing | `05-stream-processing` |
-| 6 | Metrics & Alerting | `06-metrics-alerting` |
-| 7 | Event Sourcing | `07-event-sourcing` |
-| 8 | Change Data Capture | `08-cdc` |
-| 9 | Data Pipelines | `09-data-pipelines` |
-| 10 | Replay & Recovery | `10-replay-recovery` |
+| 5 | Stream Processing | [`05-stream-processing`](05-stream-processing) |
+| 6 | Metrics & Alerting | [`06-metrics-alerting`](06-metrics-alerting) |
+| 7 | Event Sourcing | [`07-event-sourcing`](07-event-sourcing) |
+| 8 | Change Data Capture | [`08-cdc`](08-cdc) |
+| 9 | Data Pipelines | [`09-data-pipelines`](09-data-pipelines) |
+| 10 | Replay & Recovery | [`10-replay-recovery`](10-replay-recovery) |
 
 These use cases are shown in gif [`kafka-use-cases.gif`](kafka-use-cases.gif)
 
