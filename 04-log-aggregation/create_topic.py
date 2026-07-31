@@ -23,9 +23,11 @@ def main():
     existing = admin.list_topics(timeout=5).topics
     if TOPIC in existing:
         print(f"Topic '{TOPIC}' already exists with "
-              f"{len(existing[TOPIC].partitions)} partition(s). "
-              f"Delete it first if you want to recreate with {NUM_PARTITIONS}.")
-        return
+              f"{len(existing[TOPIC].partitions)} partition(s). Deleting...")
+        futures = admin.delete_topics([TOPIC], operation_timeout=30)
+        for _, future in futures.items():
+            future.result()
+        print(f"Deleted '{TOPIC}'.")
 
     new_topic = NewTopic(TOPIC, num_partitions=NUM_PARTITIONS, replication_factor=1)
     futures = admin.create_topics([new_topic])
