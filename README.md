@@ -8,7 +8,7 @@ Python (`confluent-kafka`) against a single local broker.
 | 1 | Async Messaging | [`01-async-messaging`](01-async-messaging) |
 | 2 | Pub-Sub Fan-Out | `02-pubsub-fanout` |
 | 3 | Activity Tracking | `03-activity-tracking` |
-| 4 | Log Aggregation | `04-log-aggregation` |
+| 4 | Log Aggregation | [`04-log-aggregation`](04-log-aggregation) |
 | 5 | Stream Processing | `05-stream-processing` |
 | 6 | Metrics & Alerting | `06-metrics-alerting` |
 | 7 | Event Sourcing | `07-event-sourcing` |
