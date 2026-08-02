@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: quay.io/debezium/postgres:15
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: shopdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - kafka_default
+
+  kafka-connect:
+    image: quay.io/debezium/connect:2.7
+    container_name: kafka-connect
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:29092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+      # unwrap the Debezium JSON envelope so consumers get plain JSON,
+      # no {"schema": ..., "payload": ...} wrapper to unpack
+      KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+    depends_on:
+      - postgres
+    networks:
+      - kafka_default
+
+# join the network created by the root docker-compose.yml so kafka-connect can reach the broker
+networks:
+  kafka_default:
+    external: true
+
+volumes:
+  postgres-data:
+
