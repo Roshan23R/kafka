@@ -10,6 +10,7 @@ Run:
 """
 
 import json
+from datetime import datetime
 from confluent_kafka import Consumer
 
 TOPIC = "cpu-alerts"
@@ -37,7 +38,7 @@ def main():
 
             alert = json.loads(msg.value())
             icon = "🔥" if alert["status"] == "ALERT" else "✅"
-            print(f"{icon} [{alert['source']}] {alert['status']} -- rolling avg {alert['rolling_avg']}%")
+            print(f"{icon} [{datetime.fromtimestamp(alert['ts']).strftime('%Y-%m-%d %H:%M:%S')}] [{alert['source']}] {alert['status']} -- rolling avg {alert['rolling_avg']}%")
     except KeyboardInterrupt:
         pass
     finally:

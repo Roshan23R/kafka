@@ -24,6 +24,7 @@ SOURCES = ["api", "db"]
 # high for a few seconds, then recover, so the sliding average actually
 # has time to cross the alert threshold instead of one noisy blip
 spike_until = {s: 0 for s in SOURCES}
+# {"api": 0, "db": 0}
 
 
 def delivery_report(err, msg):

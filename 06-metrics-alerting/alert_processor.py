@@ -53,6 +53,7 @@ def main():
     # current alert state per source, so we only fire on OK->ALERT and
     # ALERT->OK transitions, never once per reading
     alert_state = {}
+    running_sum = {}  # running sum per source for efficient rolling average calculation
 
     print(f"Watching cpu-metrics, alerting when rolling avg >= {ALERT_THRESHOLD}% (Ctrl+C to stop)...")
     try:
@@ -67,9 +68,12 @@ def main():
             reading = json.loads(msg.value())
             source = reading["source"]
 
+
             window = windows.setdefault(source, deque(maxlen=WINDOW_SIZE))
+            # update running sum for this source
+            running_sum[source] = running_sum.get(source, 0) - (window[0] if len(window) == WINDOW_SIZE else 0) + reading["cpu_pct"]
             window.append(reading["cpu_pct"])
-            rolling_avg = round(sum(window) / len(window), 1)
+            rolling_avg = round(running_sum[source] / len(window), 1)
 
             is_breaching = rolling_avg >= ALERT_THRESHOLD
             was_breaching = alert_state.get(source, False)
