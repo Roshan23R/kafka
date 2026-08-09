@@ -1,6 +1,31 @@
 # 7. Event Sourcing
 
-**State as an append-only log.**
+> **What's your account balance? There's no field that says. You have to ask history.**
+
+Picture a bank statement. It doesn't store one number called "your
+balance." It stores every deposit, every withdrawal, every fee — a
+list. Your balance is what you get when you add all of those up.
+Nobody at the bank ever "sets" your balance directly; it only ever
+exists as the *sum of everything that happened*.
+
+```text
+Normal database thinking:              Event-sourced thinking:
+
+accounts table                         account-events log
++------------+---------+               +------------------+
+| account_id | balance |               | DEPOSIT  +100    |
++------------+---------+               | WITHDRAW -30     |
+| acc-1      |   90    |  <- one       | DEPOSIT  +20     |
++------------+---------+     number,   +------------------+
+                              history          |
+                              overwritten      v
+                              on every UPDATE  fold them all together
+                                               -> 90 (derived, not stored)
+```
+
+This pattern is that bank-statement mental model, applied to Kafka.
+
+## 🎯 The setup
 
 `events_producer.py` emits `DEPOSIT`/`WITHDRAW` events for a couple of
 accounts. Notice what's deliberately *not* there: no "current balance"
@@ -16,7 +41,61 @@ old value and losing history). Here, nothing is ever overwritten —
 the full history of *how* the balance got to where it is stays
 available forever.
 
-## Run it
+## 💡 Why anyone would want this
+
+A normal `UPDATE` throws away the "how did we get here." Event
+sourcing keeps it, for free, as a side effect of how storage works.
+That has real, practical payoffs:
+
+```text
+"Why is this account's balance $90?"
+
+Normal DB:        "It just is. That's what the row says."
+
+Event-sourced:     DEPOSIT +100  (Jan 3, 9:14am)
+                    WITHDRAW -30  (Jan 3, 2:30pm)
+                    DEPOSIT +20  (Jan 5, 11:02am)
+                    -----------------------------
+                    = $90, and here's exactly how
+                      we got there, in order
+```
+
+You get a full audit trail without building one separately. You can
+answer "what did the balance look like last Tuesday at noon" by
+replaying only up to that point. And — this is the part `rebuild_balance.py`
+demonstrates directly — if your derived balance ever gets corrupted or
+you change how you compute it, you can throw it away and rebuild it
+perfectly from the log, because the log never lied to you in the
+first place.
+
+## 🧠 The subtlety: does replay order actually matter here?
+
+`rebuild_balance.py` uses **manual partition assignment and watermark
+offsets** rather than a normal subscribe-and-run consumer, because
+this is a one-shot batch replay that needs a hard, known finish line —
+not a service that runs forever. Worth reasoning through *why* the
+partition count doesn't threaten correctness here: since every event
+is keyed by `account_id`, one account's own events always land on the
+same partition, in order — no matter how many partitions exist or how
+other accounts interleave around them. And because summing
+deposit/withdrawal deltas is commutative, even cross-account
+interleaving order wouldn't change the final numbers. Order would only
+start to matter for logic that depends on sequence — e.g. rejecting a
+withdrawal based on the balance *at that specific moment* — which this
+demo doesn't implement, but is the exact line where partitioning
+choices start to matter for real.
+
+## 🏗️ Where this shows up for real
+
+- **Banking & ledgers** — literally this example; double-entry
+  bookkeeping is event sourcing that predates computers by centuries.
+- **Version control** — Git doesn't store "the current file." It
+  stores every commit and derives the current state by replaying them.
+- **Shopping carts / order state machines** — `ITEM_ADDED`,
+  `ITEM_REMOVED`, `CHECKED_OUT` as the log, current cart contents as
+  the derived view.
+
+## ▶️ Run it
 
 1. Broker running (`docker compose up -d` from repo root).
 2. Create the topic with multiple partitions:
@@ -56,7 +135,7 @@ a withdrawal based on the balance *at that moment* — which this simple
 demo doesn't implement, but is worth knowing as the line where
 partitioning choices would start to matter more.
 
-## What to observe
+## 👀 What to observe
 
 - `rebuild_balance.py` always starts from **offset 0** — the very
   first event ever produced — and replays forward. Run it twice in a
@@ -86,3 +165,42 @@ partitioning choices would start to matter more.
   precisely when it has reached "the end" and stop, not a long-running
   service that tracks its position across restarts via a shared
   group.id. Different job, different consumer API.
+
+## 🚀 Try breaking it
+
+**1. Produce events for a brand-new account**
+
+Add a new account name to `ACCOUNTS` in `events_producer.py`, produce
+some events for it, then rerun `rebuild_balance.py`. Does it show up
+automatically, with no code changes to the rebuild script?
+
+**2. Interrupt `rebuild_balance.py` mid-replay**
+
+Ctrl+C it partway through a large replay, then run it again. Does it
+resume from where it stopped, or start over completely? Why?
+
+**3. Try to make it resume instead of replay**
+
+Based on the earlier discussion of `.assign()` + `.seek(0)` always
+forcing a full replay: what specific lines would you need to remove or
+change to make this script *resume* from last time instead of
+replaying everything? (Hint: think about what would need to be
+persisted between runs, and revisit Pattern 3's Redis approach.)
+
+## 💬 Questions worth answering yourself
+
+- If you deleted the entire `account-events` topic and lost all its data, is
+  there any way to recover the current balances? What does your answer
+  say about where "the truth" actually lives in this design?
+- Why does `rebuild_balance.py` need to know the exact partition count
+  and watermark offsets, when `events_producer.py` never needs to
+  think about partitions at all?
+- What would break in this design if two different account IDs
+  accidentally hashed to a scenario where their events needed to stay
+  interleaved in a specific order relative to each other?
+
+The next pattern moves from "one system's internal log" to "keeping a
+totally separate system in sync automatically" — no application code
+required on the syncing side at all.
+
+➡️ Continue to [`08-cdc`](../08-cdc)

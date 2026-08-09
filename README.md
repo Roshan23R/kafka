@@ -23,7 +23,7 @@ Apache Kafka is not just a message queue. It is a **distributed event streaming 
 
 This repository takes you through those problems one by one.
 
----
+<br>
 
 # The Story
 
