@@ -477,7 +477,7 @@ Good distributed-system design comes from understanding the problem first and th
 | [`05-stream-processing`](05-stream-processing)   | Process events continuously in real time       |
 | [`06-metrics-alerting`](06-metrics-alerting)  | Detect conditions and trigger alerts           |
 | [`07-event-sourcing`](07-event-sourcing)      | Preserve the complete history of state changes |
-| [`08-change-data-capture`](08-change-data-capture) | Turn database changes into events              |
+| [`08-cdc`](08-cdc) | Turn database changes into events              |
 | [`09-data-pipelines`](09-data-pipelines)      | Move data between independent systems          |
 | [`10-replay-recovery`](10-replay-recovery)   | Reprocess events after failures or bugs        |
 
