@@ -25,7 +25,7 @@ This repository takes you through those problems one by one.
 
 <br>
 
-# The Story
+## The Story
 
 Imagine you have joined a company as a Backend Engineer.
 
@@ -69,7 +69,7 @@ Now your Kafka journey begins.
 
 <br>
 
-# What Exactly Is Kafka?
+## What Exactly Is Kafka?
 
 At a high level, Kafka allows applications to:
 
@@ -103,7 +103,7 @@ The consumers independently process that event.
 
 <br>
 
-# Core Kafka Concepts
+## Core Kafka Concepts
 
 Before looking at the use cases, understand these concepts.
 
@@ -247,7 +247,7 @@ This allows Kafka workloads to scale horizontally.
 
 <br>
 
-# Why Kafka?
+## Why Kafka?
 
 Kafka becomes particularly useful when your system needs:
 
@@ -282,7 +282,7 @@ Applications can process streams as events arrive.
 
 <br>
 
-# What You Will Learn
+## What You Will Learn
 
 By completing these ten demos, you will understand the practical building blocks behind Kafka-based systems:
 
@@ -333,7 +333,7 @@ This is the foundation of many modern distributed systems.
 
 <br>
 
-# Setup
+## Setup
 
 ### Requirements
 
@@ -396,7 +396,7 @@ A production Kafka cluster would typically use multiple brokers and controllers 
 
 <br>
 
-# Recommended Learning Path
+## Recommended Learning Path
 
 Don't simply run all ten examples one after another.
 
@@ -437,7 +437,7 @@ These questions move you from simply **using Kafka** to thinking like a distribu
 
 <br>
 
-# A Practical Mental Model
+## A Practical Mental Model
 
 Whenever you encounter a requirement involving:
 
@@ -466,7 +466,7 @@ Good distributed-system design comes from understanding the problem first and th
 <br>
 
 
-# Ten Patterns at a Glance
+## Ten Patterns at a Glance
 
 | Pattern             | Real-World Problem                             |
 | -- | ------------------- |
@@ -484,8 +484,103 @@ Good distributed-system design comes from understanding the problem first and th
 ![Kafka Use Cases](kafka-use-cases.gif)
 <br>
 
+## Useful Kafka checks
 
-# The Real Goal
+### Increase partitions for a topic
+
+Kafka topics can be created with one or more partitions. If a topic already
+exists and needs more partitions, run this command from PowerShell inside the
+Kafka project:
+
+```powershell
+docker exec kafka kafka-topics `
+  --bootstrap-server kafka:29092 `
+  --alter `
+  --topic <topic-name> `
+  --partitions <partition-count>
+```
+
+For example, to increase the `recovery-events` topic to three partitions:
+
+```powershell
+docker exec kafka kafka-topics `
+  --bootstrap-server kafka:29092 `
+  --alter `
+  --topic recovery-events `
+  --partitions 3
+```
+
+Then verify the result:
+
+```powershell
+docker exec kafka kafka-topics `
+  --bootstrap-server kafka:29092 `
+  --describe `
+  --topic recovery-events
+```
+
+Replace the topic name and `3` with the values you need. The partition count
+is the total desired count, not the number of partitions to add. Kafka allows
+partitions to be added, but not removed. Existing messages stay in their
+original partitions, and new messages may be distributed across the new
+partitions.
+
+### Other useful checks
+
+Use these commands to inspect Kafka from the terminal. Replace
+`<topic-name>` and `<group-name>` with the topic or consumer group you want
+to inspect.
+
+List all topics:
+
+```powershell
+docker exec kafka kafka-topics `
+  --bootstrap-server kafka:29092 `
+  --list
+```
+
+Describe a topic, including its partitions and leaders:
+
+```powershell
+docker exec kafka kafka-topics `
+  --bootstrap-server kafka:29092 `
+  --describe `
+  --topic <topic-name>
+```
+
+List consumer groups:
+
+```powershell
+docker exec kafka kafka-consumer-groups `
+  --bootstrap-server kafka:29092 `
+  --list
+```
+
+Inspect a consumer group, including current offsets and lag:
+
+```powershell
+docker exec kafka kafka-consumer-groups `
+  --bootstrap-server kafka:29092 `
+  --describe `
+  --group <group-name>
+```
+
+Read messages from a topic without changing a consumer group:
+
+```powershell
+docker exec kafka kafka-console-consumer `
+  --bootstrap-server kafka:29092 `
+  --topic <topic-name> `
+  --from-beginning `
+  --timeout-ms 5000
+```
+
+The consumer-group output is especially useful for checking lag. A growing
+`LAG` value means producers are creating messages faster than the consumer
+group is processing them.
+
+
+## The Real Goal
 
 After completing this repository, you shouldn't just be able to answer:
 
