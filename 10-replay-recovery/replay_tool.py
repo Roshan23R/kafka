@@ -82,7 +82,7 @@ def main():
     while not caught_up():
         msg = consumer.poll(1.0)
         if msg is None:
-            break
+            continue
         if msg.error():
             print(f"Consumer error: {msg.error()}")
             continue
